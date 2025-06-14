@@ -4,6 +4,7 @@ import "net/http"
 
 type Context struct {
 	Note              string
+	IsNoteCreated     bool
 	TeamPath          string
 	BaseUrl           string
 	ApiToken          string

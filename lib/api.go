@@ -22,6 +22,10 @@ func ConstructRequestUrl(ctx *Context) string {
 }
 
 func GetNoteContent(ctx *Context) (string, error) {
+	if ctx.Note == "" {
+		return "", nil
+	}
+
 	requestUrl := ConstructRequestUrl(ctx)
 	slog.Debug("Requesting note", "url", requestUrl)
 	req, err := http.NewRequest("GET", requestUrl, nil)
@@ -115,8 +119,8 @@ func watchForSaves(watcher *fsnotify.Watcher, ctx *Context, filePath string, don
 				return
 			}
 			if event.Op&fsnotify.Write == fsnotify.Write {
-				slog.Debug("File saved, preparing to POST update...")
-				err := DoUpdate(ctx, filePath)
+				slog.Debug("File saved, firing update to API.")
+				err := DoUpdateOrCreate(ctx, filePath)
 				if err != nil {
 					slog.Error("Failed to update note", "error", err)
 				}
@@ -130,6 +134,14 @@ func watchForSaves(watcher *fsnotify.Watcher, ctx *Context, filePath string, don
 			slog.Debug("Stopping file watcher.")
 			return
 		}
+	}
+}
+
+func DoUpdateOrCreate(ctx *Context, filePath string) error {
+	if ctx.Note == "" {
+		return DoCreate(ctx, filePath)
+	} else {
+		return DoUpdate(ctx, filePath)
 	}
 }
 
@@ -149,6 +161,35 @@ func DoUpdate(ctx *Context, filePath string) error {
 	req.Header.Set("Authorization", "Bearer "+ctx.ApiToken)
 	resp, err := ctx.Client.Do(req)
 	if err != nil {
+		return fmt.Errorf("failed to make PATCH request: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode >= 400 {
+		return fmt.Errorf("server returned an error status: %s", resp.Status)
+	}
+
+	ctx.TokenUsage++
+	ctx.LastStoredContent = string(content)
+
+	return nil
+}
+
+func DoCreate(ctx *Context, filePath string) error {
+	content, err := os.ReadFile(filePath)
+	if err != nil {
+		return fmt.Errorf("failed to read file: %w", err)
+	}
+
+	req, err := http.NewRequest("POST", ConstructRequestUrl(ctx), bytes.NewReader(content))
+	if err != nil {
+		return fmt.Errorf("failed to create PATCH request: %w", err)
+	}
+
+	req.Header.Set("Content-Type", "text/plain")
+	req.Header.Set("Authorization", "Bearer "+ctx.ApiToken)
+	resp, err := ctx.Client.Do(req)
+	if err != nil {
 		return fmt.Errorf("failed to make POST request: %w", err)
 	}
 	defer resp.Body.Close()
@@ -157,6 +198,18 @@ func DoUpdate(ctx *Context, filePath string) error {
 		return fmt.Errorf("server returned an error status: %s", resp.Status)
 	}
 
+	createdNote, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return fmt.Errorf("failed to read response body: %w", err)
+	}
+	var note Note
+	err = json.Unmarshal(createdNote, &note)
+	if err != nil {
+		return fmt.Errorf("failed to unmarshal response body: %w", err)
+	}
+
+	ctx.Note = note.Id
+	ctx.IsNoteCreated = true
 	ctx.TokenUsage++
 	ctx.LastStoredContent = string(content)
 

@@ -41,20 +41,17 @@ func BootstrapApp() Context {
 	teamPath := flag.String("team", "", "Path to team")
 	flag.Parse()
 
-	if *note == "" {
-		LogFatal("Note ID is required")
-	}
-
 	SetLogLevelFromEnv()
 
 	ctx := Context{
-		Note:       *note,
-		TeamPath:   *teamPath,
-		BaseUrl:    os.Getenv("HACKMD_BASE_URL"),
-		ApiToken:   os.Getenv("HACKMD_API_TOKEN"),
-		Editor:     os.Getenv("EDITOR"),
-		EditorArgs: os.Getenv("EDITOR_ARGS"),
-		Client:     &http.Client{},
+		Note:          *note,
+		IsNoteCreated: false,
+		TeamPath:      *teamPath,
+		BaseUrl:       os.Getenv("HACKMD_BASE_URL"),
+		ApiToken:      os.Getenv("HACKMD_API_TOKEN"),
+		Editor:        os.Getenv("EDITOR"),
+		EditorArgs:    os.Getenv("EDITOR_ARGS"),
+		Client:        &http.Client{},
 	}
 
 	if ctx.BaseUrl == "" {

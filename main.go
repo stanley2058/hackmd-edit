@@ -16,6 +16,9 @@ func main() {
 		lib.LogFatal(fmt.Sprintf("An error occurred: %v", err))
 	}
 
+	if ctx.IsNoteCreated {
+		fmt.Printf("New note created: %s\n", ctx.Note)
+	}
 	fmt.Printf("API token usage: %d.\nBye!", ctx.TokenUsage)
 }
 
@@ -46,7 +49,7 @@ func run(ctx *lib.Context) error {
 	currentContent, _ := os.ReadFile(tmpFileName)
 	if string(currentContent) != ctx.LastStoredContent {
 		slog.Debug("Content changed, firing final update.")
-		err := lib.DoUpdate(ctx, tmpFileName)
+		err := lib.DoUpdateOrCreate(ctx, tmpFileName)
 		if err != nil {
 			return fmt.Errorf("failed to update note: %w", err)
 		}
