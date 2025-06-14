@@ -16,7 +16,7 @@ func main() {
 		lib.LogFatal(fmt.Sprintf("An error occurred: %v", err))
 	}
 
-	fmt.Printf("This session used %d tokens.\nBye!", ctx.TokenUsage)
+	fmt.Printf("API token usage: %d.\nBye!", ctx.TokenUsage)
 }
 
 func run(ctx *lib.Context) error {
