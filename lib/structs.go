@@ -32,3 +32,7 @@ type Note struct {
 	ReadPermission  string   `json:"readPermission"`
 	WritePermission string   `json:"writePermission"`
 }
+
+type UpdateRequest struct {
+	Content string `json:"content"`
+}

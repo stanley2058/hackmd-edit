@@ -135,12 +135,13 @@ func DoUpdate(ctx *Context, filePath string) error {
 		return fmt.Errorf("failed to read file: %w", err)
 	}
 
-	req, err := http.NewRequest("PATCH", ConstructRequestUrl(ctx), bytes.NewReader(content))
+	update, _ := json.Marshal(UpdateRequest{Content: string(content)})
+	req, err := http.NewRequest("PATCH", ConstructRequestUrl(ctx), bytes.NewReader(update))
 	if err != nil {
 		return fmt.Errorf("failed to create PATCH request: %w", err)
 	}
 
-	req.Header.Set("Content-Type", "text/plain")
+	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", "Bearer "+ctx.ApiToken)
 	resp, err := ctx.Client.Do(req)
 	if err != nil {
