@@ -90,7 +90,11 @@ func CreateFileWatcher(ctx *Context, filePath string) (*fsnotify.Watcher, *chan 
 
 func OpenEditor(ctx *Context, filePath string) error {
 	slog.Debug("Opening file in editor", "file", filePath, "editor", ctx.Editor)
-	cmd := exec.Command(ctx.Editor, filePath)
+	cmd := exec.Command(ctx.Editor)
+	if ctx.EditorArgs != "" {
+		cmd.Args = append(cmd.Args, ctx.EditorArgs)
+	}
+	cmd.Args = append(cmd.Args, filePath)
 
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout

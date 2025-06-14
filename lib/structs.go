@@ -8,6 +8,7 @@ type Context struct {
 	BaseUrl           string
 	ApiToken          string
 	Editor            string
+	EditorArgs        string
 	Client            *http.Client
 	LastStoredContent string
 	TokenUsage        int

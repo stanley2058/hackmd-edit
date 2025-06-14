@@ -48,12 +48,13 @@ func BootstrapApp() Context {
 	SetLogLevelFromEnv()
 
 	ctx := Context{
-		Note:     *note,
-		TeamPath: *teamPath,
-		BaseUrl:  os.Getenv("HACKMD_BASE_URL"),
-		ApiToken: os.Getenv("HACKMD_API_TOKEN"),
-		Editor:   os.Getenv("EDITOR"),
-		Client:   &http.Client{},
+		Note:       *note,
+		TeamPath:   *teamPath,
+		BaseUrl:    os.Getenv("HACKMD_BASE_URL"),
+		ApiToken:   os.Getenv("HACKMD_API_TOKEN"),
+		Editor:     os.Getenv("EDITOR"),
+		EditorArgs: os.Getenv("EDITOR_ARGS"),
+		Client:     &http.Client{},
 	}
 
 	if ctx.BaseUrl == "" {
