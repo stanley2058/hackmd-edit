@@ -15,6 +15,18 @@ You can also use `.env` file to set these variables, see [.env.example](.env.exa
 
 ## Usage
 
+To create and edit a new personal note:
+
+```
+> hackmd-edit
+```
+
+To create and edit a new team note:
+
+```
+> hackmd-edit --team <team-path>
+```
+
 To edit a personal note:
 
 ```
